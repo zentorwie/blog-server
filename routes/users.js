@@ -2,6 +2,7 @@ const User = require('../models/user')
 const Router = require('koa-router')
 const router = new Router()
 const validator = require('validator')
+const utils = require('../utils')
 
 router.post('/users', async (ctx) => {
   let userParam = ctx.request.body
@@ -15,9 +16,18 @@ router.get('/users', async (ctx) => {
   if (!ctx.state.user) {
     ctx.throw(401)
   }
-  let users = await User.find({}, 'id username email gender createdAt')
+
+  const result = await utils.getPageByIndex(User, {
+    _id: 1,
+    username: 1,
+    email: 1,
+    verifiedEmail: 1,
+    gender: 1,
+    createdAt: 1
+  }, parseInt(ctx.query.pageIndex), parseInt(ctx.query.pageSize), '_id')
+
   ctx.status = 200
-  ctx.body = users
+  ctx.body = result
 })
 
 router.get('/users/:userId', async (ctx) => {
@@ -31,6 +41,19 @@ router.get('/users/:userId', async (ctx) => {
     'id username gender email verifiedEmail createdAt updatedAt')
   ctx.status = 200
   ctx.body = user
+})
+
+router.post('/users/setup', async (ctx) => {
+  for (let i = 0; i < 100; i++) {
+    const user = new User({
+      username: `user${i}`,
+      password: 123456,
+      email: `user${i}@g.com`,
+      gender: 'unknown'
+    })
+    await user.save()
+  }
+  ctx.status = 201
 })
 
 module.exports = router

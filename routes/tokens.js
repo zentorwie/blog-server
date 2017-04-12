@@ -8,7 +8,8 @@ router.post('/tokens', async (ctx) => {
   let username = ctx.request.body.username
   let password = ctx.request.body.password
 
-  if (username === null || password === null) {
+  console.log(`USER LOGIN: ${username} ${password}`)
+  if (username === undefined || password === undefined) {
     ctx.throw(401)
   }
 
